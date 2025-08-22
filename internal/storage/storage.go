@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -100,4 +101,40 @@ func (s *Storage) FindTask(ctx context.Context, filter *domain.Filter) ([]*domai
 	}
 
 	return tasks, nil
+}
+
+func (s *Storage) CreateTask(ctx context.Context, task *domain.Task) (int64, error) {
+	var id int64
+	err := s.pool.QueryRow(ctx, "INSERT INTO scheduler (date, title, comment, repeat) VALUES ($1,$2,$3,$4) RETURNING id",
+		task.Date, task.Title, task.Comment, task.Repeat).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
+func (s *Storage) UpdateTask(ctx context.Context, task *domain.Task) error {
+	res, err := s.pool.Exec(ctx,
+		"UPDATE scheduler SET date = $1, title = $2, comment = $3, repeat = $4 WHERE id = $5",
+		task.Date, task.Title, task.Comment, task.Repeat, task.ID)
+	if err != nil {
+		return err
+	}
+	if res.RowsAffected() == 0 {
+		return fmt.Errorf("id задачи не найден в БД")
+	}
+	return nil
+}
+
+func (s *Storage) DeleteTask(ctx context.Context, id *int) error {
+	res, err := s.pool.Exec(ctx,
+		"DELETE FROM scheduler WHERE id = $1", id)
+	if err != nil {
+		return err
+	}
+	if res.RowsAffected() == 0 {
+		return fmt.Errorf("id задачи не найден в БД")
+	}
+	return nil
 }
