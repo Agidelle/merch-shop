@@ -28,13 +28,6 @@ func NewPool(ctx context.Context, dsn string) *Storage {
 		log.Fatalf("Unable to create connection pool: %v\n", err)
 	}
 
-	// Check if the connection pool is working
-	err = pool.Ping(ctx)
-	if err != nil {
-		pool.Close()
-		log.Fatalf("Unable to connect to database: %v\n", err)
-	}
-
 	return &Storage{pool: pool}
 }
 
