@@ -1,5 +1,7 @@
 package domain
 
+import "context"
+
 type Task struct {
 	ID      string `json:"id,omitempty"`
 	Date    string `json:"date,omitempty"`
@@ -24,10 +26,10 @@ type Filter struct {
 }
 
 type TaskRepository interface {
-	FindTask(filter *Filter) ([]*Task, error)
-	CreateTask(task *Task) (int64, error)
-	UpdateTask(task *Task) error
-	DeleteTask(id *int) error
+	FindTask(ctx context.Context, filter *Filter) ([]*Task, error)
+	CreateTask(ctx context.Context, task *Task) (int64, error)
+	UpdateTask(ctx context.Context, task *Task) error
+	DeleteTask(ctx context.Context, id *int) error
 	Close() error
 }
 
